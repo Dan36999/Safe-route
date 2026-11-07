@@ -1,5 +1,3 @@
-Here's a much cleaner, more natural, humanised README with the academic filler, excessive detail, and unnecessary technical explanations removed.
-
 SafeRoute - Community Safety Route Planner
 
 CPU4106 Group Project
