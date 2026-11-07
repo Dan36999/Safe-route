@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% set active_page = 'routes' %}
+{% block title %}Route Search{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-1">Route Search</h1>
+<p class="text-muted-small mb-4" style="max-width: 46rem;">
+    Enter a start point and destination to see the safety score for that corridor, calculated
+    from community hazard reports.
+</p>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="post" action="{{ url_for('routes') }}" class="row g-3 align-items-end" data-validate novalidate>
+            <div class="col-md-5">
+                <label class="form-label" for="startPoint">Start Location</label>
+                <input class="form-control" type="text" id="startPoint" name="startPoint"
+                       list="routeLocations" value="{{ start_point }}"
+                       placeholder="e.g. Wembley Park Station" required>
+                <div class="invalid-feedback">Please enter a start location.</div>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label" for="endPoint">Destination</label>
+                <input class="form-control" type="text" id="endPoint" name="endPoint"
+                       list="routeLocations" value="{{ end_point }}"
+                       placeholder="e.g. High Road Wembley" required>
+                <div class="invalid-feedback">Please enter a destination.</div>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-primary" type="submit">Find Route</button>
+            </div>
+            <datalist id="routeLocations">
+                {% for name in locations %}<option value="{{ name }}"></option>{% endfor %}
+            </datalist>
+        </form>
+    </div>
+</div>
+
+{% if result %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                <span class="fw-semibold">{{ result.start }} → {{ result.end }}</span>
+                <span class="sr-band {{ result.band.css }}">{{ result.band.label }}</span>
+            </div>
+            <div class="card-body">
+                <div id="routeMap" class="sr-route-map" role="img"
+                     aria-label="Map showing the searched route corridor and nearby hazard reports"></div>
+                <p class="text-muted-small mt-2 mb-0">
+                    The green dashed line shows the searched corridor. Only incidents within
+                    {{ corridor_metres }} m of the corridor are counted.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="sr-stat-label">Safety Score</div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <span class="sr-score-value sr-score-large">{{ result.score }}</span>
+                    <span class="text-muted-small">/ 100</span>
+                </div>
+                <p class="mt-3 mb-3"><span class="sr-band {{ result.band.css }}">{{ result.band.label }}</span></p>
+                <p class="text-muted-small mb-3">{{ result.band.advice }}</p>
+                <hr>
+                <dl class="row mb-0 text-muted-small">
+                    <dt class="col-7 fw-normal">Incidents on corridor</dt>
+                    <dd class="col-5 text-end fw-semibold text-body">{{ result.incidents|length }}</dd>
+                    <dt class="col-7 fw-normal">Approx. distance</dt>
+                    <dd class="col-5 text-end fw-semibold text-body">{{ result.distance }} km</dd>
+                    <dt class="col-7 fw-normal">Score model</dt>
+                    <dd class="col-5 text-end fw-semibold text-body">100 − ({{ result.incidents|length }} × 5)</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h2 class="h6 mb-0">Hazards near this route</h2></div>
+            <ul class="list-group list-group-flush">
+            {% for r in result.incidents[:4] %}
+                <li class="list-group-item">
+                    <span class="sr-type-pill">{{ r.IncidentType }}</span>
+                    <span class="d-block mt-2 fw-medium">{{ r.Location }}</span>
+                    <span class="d-block text-muted-small">{{ r.DateReported.strftime('%d %b %Y') }}</span>
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted-small">
+                    No hazards reported near this corridor. Standard travel precautions apply.
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center text-muted-small py-5">
+        Enter two locations to generate a route safety score. This prototype estimates the score
+        from community reports and does not provide live GPS navigation.
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent searches -->
+<div class="card mt-4">
+    <div class="card-header"><h2 class="h6 mb-0">Your Recent Route Searches</h2></div>
+    {% if history %}
+    <div class="table-responsive">
+        <table class="table sr-table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Start Point</th>
+                    <th scope="col">End Point</th>
+                    <th scope="col">Safety Score</th>
+                    <th scope="col">Search Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for row in history %}
+                <tr>
+                    <td class="fw-medium">{{ row.StartPoint }}</td>
+                    <td class="fw-medium">{{ row.EndPoint }}</td>
+                    <td>
+                        <span class="fw-semibold me-2">{{ row.SafetyScore }}</span>
+                        <span class="sr-band {{ 'band-safe' if row.SafetyScore >= 90 else ('band-moderate' if row.SafetyScore >= 70 else 'band-high') }}">
+                            {{ 'Safe' if row.SafetyScore >= 90 else ('Moderate Risk' if row.SafetyScore >= 70 else 'High Risk') }}
+                        </span>
+                    </td>
+                    <td class="text-muted-small text-nowrap">{{ row.SearchDate.strftime('%d %b %Y') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card-body text-muted-small">Your saved route searches will appear here.</div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if result %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script>
+    SafeRouteMap.initRouteMap('routeMap', {
+        start: {{ result.start_coords|tojson }},
+        end: {{ result.end_coords|tojson }},
+        startLabel: {{ result.start|tojson }},
+        endLabel: {{ result.end|tojson }},
+        incidents: {{ result.incidents|tojson }}
+    });
+</script>
+{% endif %}
+{% endblock %}

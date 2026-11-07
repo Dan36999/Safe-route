@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% set active_page = 'map' %}
+{% block title %}Safety Map{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Safety Map</h1>
+        <p class="text-muted-small mb-0">
+            Community hazard reports plotted on OpenStreetMap. Select a report to zoom to it.
+        </p>
+    </div>
+    <span class="sr-chip">{{ reports|length }} active markers</span>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div id="safetyMap" class="sr-safety-map" role="img"
+                 aria-label="Map of community hazard reports around Wembley"></div>
+        </div>
+        <p class="text-muted-small mt-2 mb-0">Map data &copy; OpenStreetMap contributors. Tiles loaded live via Leaflet.</p>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header"><h2 class="h6 mb-0">Recent Hazard Reports</h2></div>
+            <ul class="list-group list-group-flush" id="recentHazards">
+            {% for r in recent %}
+                <li class="list-group-item">
+                    <button class="sr-map-list-item" type="button"
+                            data-location="{{ r.Location }}">
+                        <span class="sr-type-pill">{{ r.IncidentType }}</span>
+                        <span class="d-block mt-2 fw-medium">{{ r.Location }}</span>
+                        <span class="d-block text-muted-small">{{ r.DateReported.strftime('%d %b %Y') }}</span>
+                    </button>
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted-small">
+                    No reports yet — the map will populate as the community contributes.
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h6">Hazard Categories</h2>
+                <ul class="list-unstyled mb-0" id="mapLegend">
+                    {% for type in incident_types %}
+                        <li class="d-flex align-items-center gap-2 text-muted-small py-1">
+                            <span class="sr-legend-dot" data-type="{{ type }}" aria-hidden="true"></span>
+                            {{ type }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report data handed to map.js as JSON -->
+<script id="sr-reports" type="application/json">{{ reports|tojson }}</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script>
+    SafeRouteMap.initSafetyMap('safetyMap', {{ center|tojson }});
+</script>
+{% endblock %}

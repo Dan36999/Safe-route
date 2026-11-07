@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% set active_page = 'home' %}
+{% block title %}Travel Smarter. Travel Safer{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="sr-hero">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+            <span class="sr-chip">SDG 11 · Sustainable Cities</span>
+            <h1 class="sr-hero-title">Travel Smarter. Travel Safer.</h1>
+            <p class="sr-hero-sub">Discover safer routes and help your community by reporting local hazards.</p>
+            <div class="d-flex flex-wrap gap-3 mt-4">
+                <a class="btn btn-primary btn-lg" href="{{ url_for('register') }}">Register</a>
+                <a class="btn btn-outline-primary btn-lg" href="{{ url_for('login') }}">Login</a>
+            </div>
+            <p class="text-muted-small mt-4 mb-0">Built for daily commuters, students and local residents.</p>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card sr-map-preview">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">Live safety snapshot — Wembley</span>
+                    <span class="badge bg-light text-secondary">Community</span>
+                </div>
+                <div id="homeMap" class="sr-home-map" role="img"
+                     aria-label="Preview map showing community hazard reports around Wembley"></div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="sr-stat-label">Safety Score</div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="sr-score-value">85</span>
+                            <span class="sr-band band-moderate">Moderate Risk</span>
+                        </div>
+                    </div>
+                    <span class="sr-band-note">100 − (incidents × 5)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics -->
+<section class="mt-5" aria-labelledby="statsHeading">
+    <h2 id="statsHeading" class="visually-hidden">SafeRoute community statistics</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card sr-stat-card">
+                <div class="sr-stat-label">Total Reports</div>
+                <div class="sr-stat-value">{{ stats.total_reports }}</div>
+                <div class="sr-stat-hint">Hazards logged by the community</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card sr-stat-card">
+                <div class="sr-stat-label">Registered Users</div>
+                <div class="sr-stat-value">{{ stats.total_users }}</div>
+                <div class="sr-stat-hint">Commuters and residents</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card sr-stat-card">
+                <div class="sr-stat-label">Routes Searched</div>
+                <div class="sr-stat-value">{{ stats.total_routes }}</div>
+                <div class="sr-stat-hint">Safety scores generated</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Feature cards -->
+<section class="mt-5" aria-labelledby="featuresHeading">
+    <h2 id="featuresHeading" class="sr-section-title">What you can do</h2>
+    <p class="text-muted-small mb-4" style="max-width: 46rem;">
+        Four tools working together: report what you see, map what the community reports,
+        and check a route before you travel.
+    </p>
+    <div class="row g-4">
+        <div class="col-sm-6 col-lg-3">
+            <a class="card sr-feature-card" href="{{ url_for('register') }}">
+                <span class="sr-feature-dot dot-warning" aria-hidden="true"></span>
+                <h3 class="h6 mt-3 mb-2">Report Hazards</h3>
+                <p class="text-muted-small mb-2">Log poor lighting, flooding, potholes and other local hazards in under a minute.</p>
+                <span class="sr-feature-link">Get started →</span>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a class="card sr-feature-card" href="{{ url_for('register') }}">
+                <span class="sr-feature-dot dot-primary" aria-hidden="true"></span>
+                <h3 class="h6 mt-3 mb-2">View Safety Map</h3>
+                <p class="text-muted-small mb-2">See community reports plotted on an OpenStreetMap view of your neighbourhood.</p>
+                <span class="sr-feature-link">Get started →</span>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a class="card sr-feature-card" href="{{ url_for('register') }}">
+                <span class="sr-feature-dot dot-secondary" aria-hidden="true"></span>
+                <h3 class="h6 mt-3 mb-2">Route Search</h3>
+                <p class="text-muted-small mb-2">Compare a start point and destination, then read the safety score for that corridor.</p>
+                <span class="sr-feature-link">Get started →</span>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a class="card sr-feature-card" href="{{ url_for('register') }}">
+                <span class="sr-feature-dot dot-danger" aria-hidden="true"></span>
+                <h3 class="h6 mt-3 mb-2">Safety Scores</h3>
+                <p class="text-muted-small mb-2">Every route is scored 0–100 so safer travel decisions are simple to explain and defend.</p>
+                <span class="sr-feature-link">Get started →</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- SDG 11 -->
+<section class="mt-5" aria-labelledby="sdgHeading">
+    <div class="card sr-sdg-card">
+        <span class="sr-chip chip-secondary">United Nations SDG 11</span>
+        <h2 id="sdgHeading" class="h4 mt-3 mb-3">Sustainable Cities and Communities</h2>
+        <p class="text-muted-small mb-4" style="max-width: 52rem;">
+            SafeRoute contributes to SDG 11 by making everyday travel safer. Sharing hazard information
+            locally means residents, students and commuters can make better-informed travel decisions —
+            and the data collected supports evidence-based safety awareness in the community.
+        </p>
+        <div class="row g-3">
+            <div class="col-md-4"><div class="sr-sdg-item"><strong>Safer travel</strong><br><span class="text-muted-small">Score-driven route choices for daily journeys.</span></div></div>
+            <div class="col-md-4"><div class="sr-sdg-item"><strong>Community participation</strong><br><span class="text-muted-small">Residents contribute the hazard data themselves.</span></div></div>
+            <div class="col-md-4"><div class="sr-sdg-item"><strong>Local evidence</strong><br><span class="text-muted-small">Reports highlight areas needing attention.</span></div></div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script>
+    SafeRouteMap.initPreviewMap('homeMap', {{ center|default([51.5565, -0.2865])|tojson }});
+</script>
+{% endblock %}

@@ -1,0 +1,165 @@
+{# ============================================================
+   SafeRoute — base layout
+   Public pages (home, register, login) show a top navbar only.
+   Authenticated pages also show the left sidebar navigation.
+   ============================================================ #}
+<!doctype html>
+<html lang="en-GB">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Home{% endblock %} · SafeRoute</title>
+    <meta name="description" content="SafeRoute — a community safety route planner. Discover safer routes and report local hazards.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="sr-header">
+    <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
+        <div class="container-fluid sr-header-inner">
+            <a class="navbar-brand sr-brand" href="{{ url_for('home') }}">
+                <span class="sr-brand-mark" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                </span>
+                <span>
+                    <span class="sr-brand-name">SafeRoute</span>
+                    <span class="sr-brand-sub">Community Safety</span>
+                </span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#srSidebar" aria-controls="srSidebar"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="ms-auto d-flex align-items-center gap-3">
+                {% if current_user %}
+                    <div class="text-end d-none d-sm-block">
+                        <div class="sr-user-name">{{ current_user.FullName }}</div>
+                        <div class="sr-user-role">Registered user</div>
+                    </div>
+                    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a class="btn btn-outline-secondary btn-sm d-none d-sm-inline-block" href="{{ url_for('login') }}">Login</a>
+                    <a class="btn btn-primary btn-sm" href="{{ url_for('register') }}">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="sr-layout">
+    {% if current_user %}
+    <aside class="sr-sidebar" id="srSidebar">
+        <div class="sr-sidebar-panel">
+            <a class="btn btn-primary w-100 mb-3" href="{{ url_for('report') }}">Report Hazard</a>
+            <nav class="nav flex-column sr-nav" aria-label="SafeRoute pages">
+                <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a class="nav-link {% if active_page == 'reports' %}active{% endif %}" href="{{ url_for('reports') }}">Reports</a>
+                <a class="nav-link {% if active_page == 'map' %}active{% endif %}" href="{{ url_for('map_view') }}">Safety Map</a>
+                <a class="nav-link {% if active_page == 'routes' %}active{% endif %}" href="{{ url_for('routes') }}">Route Search</a>
+            </nav>
+            <p class="sr-sidebar-note">CPU4106 · SDG 11<br>Community Safety Route Planner</p>
+        </div>
+    </aside>
+    {% endif %}
+
+    <main id="main" class="sr-main">
+        <div class="sr-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-4" role="status" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</div>
+
+<footer class="sr-footer">
+    <div class="sr-container sr-footer-grid">
+        <div>
+            <div class="sr-footer-brand">SafeRoute</div>
+            <p class="mb-0 text-muted-small">Community Safety Route Planner. A community-driven platform for safer everyday travel.</p>
+        </div>
+        <div>
+            <h2 class="sr-footer-title">Contact</h2>
+            <p class="mb-0 text-muted-small">SafeRoute Project Team — group enquiry and demonstration requests via the project repository.</p>
+        </div>
+        <div>
+            <h2 class="sr-footer-title">GitHub</h2>
+            <p class="mb-1"><a href="https://github.com/" target="_blank" rel="noopener">github.com</a></p>
+            <p class="mb-0 text-muted-small">Source, database script and documentation.</p>
+        </div>
+        <div>
+            <h2 class="sr-footer-title">Project Information</h2>
+            <p class="mb-1">CPU4106 — Level 4 Computing Group Project</p>
+            <p class="mb-0 text-muted-small">Flask · MySQL · Bootstrap 5 · Leaflet</p>
+        </div>
+    </div>
+    <div class="sr-footer-bottom">
+        <div class="sr-container d-flex flex-wrap gap-2 justify-content-between">
+            <span>Aligned with UN Sustainable Development Goal 11 — Sustainable Cities and Communities</span>
+            <span>&copy; 2026 SafeRoute. University prototype.</span>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* Client-side form validation feedback (Bootstrap validation states) */
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form[data-validate]').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+
+    /* Live hazard report preview */
+    var preview = document.getElementById('reportPreview');
+    if (preview) {
+        var source = ['incidentType', 'description', 'location', 'dateReported'];
+        function render() {
+            document.getElementById('previewType').textContent =
+                document.getElementById('incidentType').value || 'Incident type';
+            document.getElementById('previewDescription').textContent =
+                document.getElementById('description').value || 'Your description will appear here as you type.';
+            document.getElementById('previewLocation').textContent =
+                document.getElementById('location').value || 'Location not set';
+            document.getElementById('previewDate').textContent =
+                document.getElementById('dateReported').value || '—';
+        }
+        source.forEach(function (id) {
+            var field = document.getElementById(id);
+            if (field) { field.addEventListener('input', render); }
+        });
+        render();
+    }
+});
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

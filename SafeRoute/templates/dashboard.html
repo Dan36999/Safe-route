@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% set active_page = 'dashboard' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Dashboard</h1>
+        <p class="text-muted-small mb-0">Welcome back, {{ current_user.FullName }}. Here is your community safety summary.</p>
+    </div>
+    <span class="sr-band {{ area_band.css }}">{{ area_band.label }} · {{ area_score }}</span>
+</div>
+
+<!-- Statistics -->
+<div class="row g-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card sr-stat-card">
+            <div class="sr-stat-label">My Reports</div>
+            <div class="sr-stat-value">{{ counts.my_reports }}</div>
+            <div class="sr-stat-hint">Hazards you have submitted</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card sr-stat-card">
+            <div class="sr-stat-label">Route Searches</div>
+            <div class="sr-stat-value">{{ counts.my_routes }}</div>
+            <div class="sr-stat-hint">Routes you have scored</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card sr-stat-card">
+            <div class="sr-stat-label">Community Reports</div>
+            <div class="sr-stat-value">{{ counts.community_reports }}</div>
+            <div class="sr-stat-hint">Reported across the area</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card sr-stat-card">
+            <div class="sr-stat-label">Safety Score</div>
+            <div class="sr-stat-value">{{ area_score }}</div>
+            <div class="sr-stat-hint">100 − (incidents × 5)</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <!-- Recent reports -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Recent Community Reports</h2>
+                <a class="sr-link-small" href="{{ url_for('reports') }}">View all →</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table sr-table mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Incident Type</th>
+                            <th scope="col">Location</th>
+                            <th scope="col">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in recent %}
+                        <tr>
+                            <td><span class="sr-type-pill">{{ r.IncidentType }}</span></td>
+                            <td>{{ r.Location }}</td>
+                            <td class="text-muted-small text-nowrap">{{ r.DateReported.strftime('%d %b %Y') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="3" class="text-muted-small">No reports yet. Be the first to report a hazard.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Quick actions -->
+        <div class="card mb-4">
+            <div class="card-header"><h2 class="h6 mb-0">Quick Actions</h2></div>
+            <div class="card-body d-grid gap-2">
+                <a class="btn btn-primary" href="{{ url_for('report') }}">Report Hazard</a>
+                <a class="btn btn-outline-secondary" href="{{ url_for('routes') }}">Search Route</a>
+                <a class="btn btn-outline-secondary" href="{{ url_for('map_view') }}">View Map</a>
+            </div>
+        </div>
+
+        <!-- Latest route score -->
+        <div class="card">
+            <div class="card-header"><h2 class="h6 mb-0">Latest Route Safety Score</h2></div>
+            <div class="card-body">
+            {% if latest_route %}
+                <div class="d-flex align-items-center gap-3">
+                    <span class="sr-score-value">{{ latest_route.SafetyScore }}</span>
+                    <span class="sr-band {{ 'band-safe' if latest_route.SafetyScore >= 90 else ('band-moderate' if latest_route.SafetyScore >= 70 else 'band-high') }}">
+                        {{ 'Safe' if latest_route.SafetyScore >= 90 else ('Moderate Risk' if latest_route.SafetyScore >= 70 else 'High Risk') }}
+                    </span>
+                </div>
+                <p class="text-muted-small mt-3 mb-0">
+                    {{ latest_route.StartPoint }} → {{ latest_route.EndPoint }}<br>
+                    {{ latest_route.SearchDate.strftime('%d %b %Y') }}
+                </p>
+            {% else %}
+                <p class="text-muted-small mb-0">
+                    You have not searched a route yet.
+                    <a href="{{ url_for('routes') }}">Search a route</a> to generate a safety score.
+                </p>
+            {% endif %}
+            </div>
+            <div class="card-footer text-muted-small">Score model: 100 − (number of incidents × 5)</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
